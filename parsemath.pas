@@ -81,14 +81,20 @@ end;
 Procedure ExprTan( var Result: TFPExpressionResult; Const Args: TExprParameterArray);
 var
   x: Double;
+  ymid: real;
 begin
    x := ArgToFloat( Args[ 0 ] );
-   if IsNumber(x) and ((frac(x - 0.5) / pi) <> 0.0) then
-      Result.resFloat := tan(x)
-
+   ymid:= 100;
+   if IsNumber(x) then begin
+     if(tan(x)>ymid) or (tan(x)<(-ymid)) then
+       Result.resFloat := NaN
+     else
+       Result.resFloat := tan(x)
+   end
    else
      Result.resFloat := NaN;
 end;
+
 {
 Procedure ExprNewton( var Result: TFPExpressionResult; Const Args: TExprParameterArray);
 var
@@ -105,7 +111,6 @@ begin
    Result.ResFloat := TheNewton.Execute;
 
    TheNewton.Destroy;
-
 end;
 }
 Procedure ExprSin( var Result: TFPExpressionResult; Const Args: TExprParameterArray);

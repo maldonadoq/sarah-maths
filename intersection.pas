@@ -30,7 +30,7 @@ constructor TMethIntersection.Create();
 begin
   MParse:= TParseMath.create();
   MParse.AddVariable('x',0);
-  nv:= 20;
+  nv:= 100;
 end;
 
 destructor TMethIntersection.Destroy();
@@ -45,7 +45,7 @@ begin
   step:= (xmax-xmin)/nv;
   Result:= TList.Create;
   for i:=0 to nv-1 do begin
-    if((Func(xmin,fn)*Func(xmin+step,fn)) < 0) then
+    if((Func(xmin,fn)*Func(xmin+step,fn)) <= 0) then
       Result.Add(TMPoint.Create(xmin,xmin+step));
     xmin:= xmin+step;
   end;

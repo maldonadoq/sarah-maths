@@ -115,7 +115,7 @@ object Form1: TForm1
           Top = 104
           Width = 80
           TabOrder = 2
-          Text = '0.1'
+          Text = '0.001'
         end
         object TrackBar1: TTrackBar
           Left = 80
