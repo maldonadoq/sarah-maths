@@ -8,7 +8,9 @@ uses
   Classes, SysUtils, FileUtil, TAGraph, Forms, Controls, Graphics, Dialogs,
   StdCtrls, LCLType, ExtCtrls, ComCtrls, Grids, ParseMath, TASeries,
   TAFuncSeries, TATools, Intersection, Func, Matrices, Result, Senl,
-  Interpolacion, Types;
+  Interpolacion, Types, Math, ColorBox, TAChartUtils, TASources,
+  TACustomSeries;
+
 
 type
 
@@ -16,6 +18,12 @@ type
 
   TForm1 = class(TForm)
     BInterpolar: TButton;
+    ClearFunc: TButton;
+    Chart1LineSeries1: TLineSeries;
+    ChartToolset1: TChartToolset;
+    ChartToolset1DataPointClickTool1: TDataPointClickTool;
+    ChartToolset1PanClickTool1: TPanClickTool;
+    ChartToolset1ZoomMouseWheelTool1: TZoomMouseWheelTool;
     InterX: TEdit;
     InterY: TEdit;
     InterpSol: TEdit;
@@ -46,6 +54,7 @@ type
     SGEcuationSenl: TStringGrid;
     FInter: TTabSheet;
     SGPI: TStringGrid;
+    StatusBar1: TStatusBar;
     XA: TEdit;
     YA: TEdit;
     XB: TEdit;
@@ -85,6 +94,9 @@ type
     TrackBar1: TTrackBar;
 
     procedure BInterpolarClick(Sender: TObject);
+    procedure ChartToolset1DataPointClickTool1PointClick(ATool: TChartTool;
+      APoint: TPoint);
+    procedure ClearFuncClick(Sender: TObject);
     procedure DatoSenlClick(Sender: TObject);
     procedure DBClick(Sender: TObject);
     procedure ILagrangeClick(Sender: TObject);
@@ -107,8 +119,7 @@ type
     function CreateA(): TMatriz;
     function CreateB(): TMatriz;
   private
-    FunctionList,
-    EditList: TList;
+    FunctionList, EditList: TList;
     ActiveFunction: Integer;
     min, max: Real;
     Parse: TparseMath;
@@ -117,14 +128,16 @@ type
     MSenl: TSENL;
     PointInter: TMPoint;
     MInterpolacion: TInterpolacion;
+    FuncSelected: Boolean;
+    function1,function2: string;
 
     function f(x: Real): Real;
     function Func(x: real; s: string): real;
     procedure CreateNewFunction;
     procedure Graphic2D;
+    procedure PointXY();
 
   public
-
   end;
 
 var
@@ -148,6 +161,7 @@ begin
   GList:= TList.Create;
   MSenl:= TSENL.Create();
   MInterpolacion:= TInterpolacion.Create();
+  FuncSelected:= True;
 end;
 
 function TForm1.f( x: Real ): Real;
@@ -242,12 +256,27 @@ end;
 procedure TForm1.PointSol(xn: integer);
 var
   i: integer;
+  xt: string;
 begin
   SGPoints.RowCount:= GList.Count+1;
   SGPoints.Cells[0,0]:= 'x'; SGPoints.Cells[1,0]:= 'y';
   for i:=0 to GList.Count-1 do begin
-    SGPoints.Cells[0,i+1]:= TBox(GList.Items[i]).M[TBox(GList.Items[i]).x-1,xn];
-    SGPoints.Cells[1,i+1]:= '0';
+    xt:= TBox(GList.Items[i]).M[TBox(GList.Items[i]).x-1,xn];
+    SGPoints.Cells[0,i+1]:= xt;
+    SGPoints.Cells[1,i+1]:= FloatToStr(Func(StrToFloat(xt),function1));
+  end;
+  PointXY();
+end;
+
+procedure TForm1.PointXY();
+var
+  i: integer;
+begin
+  Chart1LineSeries1.Clear;
+  Chart1LineSeries1.Marks.Style:= smsValue;
+  for i:=1 to SGPoints.RowCount-1 do begin
+    Chart1LineSeries1.AddXY(StrToFloat(SGPoints.Cells[0,i]),StrToFloat(SGPoints.Cells[1,i]));
+    Chart1LineSeries1.AddXY(NaN,NaN);
   end;
 end;
 
@@ -258,7 +287,12 @@ var
   i: integer;
   e: real;
 begin
-  sl:= 'sin(x)-cos(x*2)';
+  if((function1='') or (function2='')) then begin
+    ShowMessage('Elige dos Funciones!!!!');
+    Exit;
+  end;
+  sl:= function1+'-'+function2;
+  WriteLn(sl);
   slp:= Derivada.Text;
   PList:= TList.Create;
   PList:= MInter.Points(min,max,sl);
@@ -266,26 +300,31 @@ begin
   TableData.Clear;
   SGPoints.Clear;
   e:= StrToFloat(ErrorH.Text);
-  if(comb.ItemIndex = 0) then begin
-    for i:=0 to PList.Count-1 do
-      GList.Add(MInter.MBisect(TPoint(PList.Items[i]).x,TPoint(PList.Items[i]).y,e,sl));
-    PointSol(3);
+
+  if(PList.Count<>0) then begin
+    if(comb.ItemIndex = 0) then begin
+      for i:=0 to PList.Count-1 do
+        GList.Add(MInter.MBisect(TMPoint(PList.Items[i]).x,TMPoint(PList.Items[i]).y,e,sl));
+      PointSol(3);
+    end
+    else if(comb.ItemIndex = 1) then begin
+      for i:=0 to PList.Count-1 do
+        GList.Add(MInter.MFalPos(TMPoint(PList.Items[i]).x,TMPoint(PList.Items[i]).y,e,sl));
+      PointSol(3);
+    end
+    else if(comb.ItemIndex = 2) then begin
+      for i:=0 to PList.Count-1 do
+        GList.Add(MInter.MNewton(TMPoint(PList.Items[i]).x,e,sl,slp));
+      PointSol(1);
+    end
+    else if(comb.ItemIndex = 3) then begin
+      for i:=0 to PList.Count-1 do
+        GList.Add(MInter.MSecant(TMPoint(PList.Items[i]).x,e,sl));
+      PointSol(1);
+    end;
   end
-  else if(comb.ItemIndex = 1) then begin
-    for i:=0 to PList.Count-1 do
-      GList.Add(MInter.MFalPos(TPoint(PList.Items[i]).x,TPoint(PList.Items[i]).y,e,sl));
-    PointSol(3);
-  end
-  else if(comb.ItemIndex = 2) then begin
-    for i:=0 to PList.Count-1 do
-      GList.Add(MInter.MNewton(TPoint(PList.Items[i]).x,e,sl,slp));
-    PointSol(1);
-  end
-  else if(comb.ItemIndex = 3) then begin
-    for i:=0 to PList.Count-1 do
-      GList.Add(MInter.MSecant(TPoint(PList.Items[i]).x,e,sl));
-    PointSol(1);
-  end;
+  else
+    ShowMessage('No hay Intersección!!!!!');
 end;
 
 procedure TForm1.DBClick(Sender: TObject);
@@ -495,6 +534,41 @@ begin
   end
   else
     ShowMessage('Aplicar Algún Método de Interpolación!!');
+end;
+
+procedure TForm1.ChartToolset1DataPointClickTool1PointClick(ATool: TChartTool;
+  APoint: TPoint);
+var
+  x, y: Double;
+begin
+  with ATool as TDatapointClickTool do
+    if (Series is TLineSeries) then
+      with TLineSeries(Series) do begin
+        if(FuncSelected) then begin
+          function1:= TEdit(EditList.Items[Tag]).Caption;
+          FuncSelected:= False;
+        end
+        else begin
+          if(function1 <> TEdit(EditList.Items[Tag]).Caption) then begin
+            function2:= TEdit(EditList.Items[Tag]).Caption;
+            FuncSelected:= True;
+          end
+          else
+            ShowMessage('Seleccione otra función, no la misma!!');
+        end;
+        x := GetXValue(PointIndex);
+        y := GetYValue(PointIndex);
+        Statusbar1.SimpleText := Format('f(x): %s', [TEdit(EditList.Items[Tag]).Caption]);
+        //ListBox1.AddItem(TEdit(EditList.Items[Tag]).Caption,TEdit(EditList.Items[Tag]));
+      end
+    else
+    begin
+      Statusbar1.SimpleText:='';
+    end;
+end;
+
+procedure TForm1.ClearFuncClick(Sender: TObject);
+begin
 end;
 
 {$R *.lfm}

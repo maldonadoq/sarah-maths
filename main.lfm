@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 111
+  Left = 407
   Height = 357
-  Top = 191
-  Width = 663
+  Top = 213
+  Width = 856
   Caption = 'Sarah-Maths'
   ClientHeight = 357
-  ClientWidth = 663
+  ClientWidth = 856
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -14,7 +14,7 @@ object Form1: TForm1
     Left = 0
     Height = 357
     Top = 0
-    Width = 663
+    Width = 856
     ActivePage = ENL
     Align = alClient
     TabIndex = 0
@@ -22,12 +22,12 @@ object Form1: TForm1
     object ENL: TTabSheet
       Caption = 'Ecuaciones No Lineales'
       ClientHeight = 326
-      ClientWidth = 653
+      ClientWidth = 846
       object Chart1: TChart
         Left = 112
         Height = 326
         Top = 0
-        Width = 387
+        Width = 580
         AxisList = <        
           item
             Minors = <>
@@ -44,10 +44,14 @@ object Form1: TForm1
         Title.Text.Strings = (
           'TAChart'
         )
+        Toolset = ChartToolset1
         Align = alClient
+        object Chart1LineSeries1: TLineSeries
+          ShowPoints = True
+        end
       end
       object Panel1: TPanel
-        Left = 499
+        Left = 692
         Height = 326
         Top = 0
         Width = 154
@@ -114,10 +118,10 @@ object Form1: TForm1
           Text = '0.1'
         end
         object TrackBar1: TTrackBar
-          Left = 28
+          Left = 80
           Height = 38
           Top = 144
-          Width = 112
+          Width = 60
           Max = 4
           Min = 1
           Position = 1
@@ -160,7 +164,7 @@ object Form1: TForm1
           Text = '0.0001'
         end
         object Derivada: TEdit
-          Left = 24
+          Left = 25
           Height = 29
           Top = 256
           Width = 116
@@ -168,45 +172,63 @@ object Form1: TForm1
           TabOrder = 7
           Text = 'Derivada '
         end
+        object ClearFunc: TButton
+          Left = 24
+          Height = 32
+          Top = 152
+          Width = 48
+          Caption = 'Clear'
+          OnClick = ClearFuncClick
+          TabOrder = 8
+        end
       end
       object ScrollBox1: TScrollBox
         Left = 0
         Height = 326
         Top = 0
         Width = 112
-        HorzScrollBar.Page = 1
-        VertScrollBar.Page = 1
+        HorzScrollBar.Page = 75
+        VertScrollBar.Page = 19
         Align = alLeft
+        ClientHeight = 324
+        ClientWidth = 110
         TabOrder = 2
+        object StatusBar1: TStatusBar
+          Left = 0
+          Height = 19
+          Top = 305
+          Width = 110
+          Panels = <>
+        end
       end
     end
     object Datos: TTabSheet
       Caption = 'Datos'
       ClientHeight = 326
-      ClientWidth = 653
+      ClientWidth = 846
       object PanelLeft: TGroupBox
         Left = 0
         Height = 326
         Top = 0
-        Width = 160
+        Width = 208
         Align = alLeft
         ClientHeight = 324
-        ClientWidth = 158
+        ClientWidth = 206
         TabOrder = 0
         object Solution: TPanel
           Left = 0
           Height = 264
           Top = 60
-          Width = 158
+          Width = 206
           Align = alClient
           ClientHeight = 264
-          ClientWidth = 158
+          ClientWidth = 206
           TabOrder = 0
           object SGPoints: TStringGrid
             Left = 1
             Height = 262
             Top = 1
-            Width = 156
+            Width = 204
             Align = alClient
             AutoFillColumns = True
             ColCount = 2
@@ -214,8 +236,8 @@ object Form1: TForm1
             RowCount = 1
             TabOrder = 0
             ColWidths = (
-              76
-              76
+              100
+              100
             )
           end
         end
@@ -223,7 +245,7 @@ object Form1: TForm1
           Left = 0
           Height = 31
           Top = 29
-          Width = 158
+          Width = 206
           Align = alTop
           Caption = 'Datos'
           OnClick = DBClick
@@ -233,16 +255,16 @@ object Form1: TForm1
           Left = 0
           Height = 29
           Top = 0
-          Width = 158
+          Width = 206
           Align = alTop
           TabOrder = 2
         end
       end
       object TableData: TStringGrid
-        Left = 160
+        Left = 208
         Height = 326
         Top = 0
-        Width = 493
+        Width = 694
         Align = alClient
         AutoFillColumns = True
         ColCount = 1
@@ -251,40 +273,40 @@ object Form1: TForm1
         RowCount = 1
         TabOrder = 1
         ColWidths = (
-          489
+          690
         )
       end
     end
     object Matrix: TTabSheet
       Caption = 'Matrices'
       ClientHeight = 326
-      ClientWidth = 653
+      ClientWidth = 846
       object BoxTM: TGroupBox
         Left = 0
-        Height = 263
+        Height = 221
         Top = 105
-        Width = 653
+        Width = 846
         Align = alClient
-        ClientHeight = 261
-        ClientWidth = 651
+        ClientHeight = 219
+        ClientWidth = 844
         TabOrder = 0
         object BMA: TGroupBox
           Left = 0
-          Height = 261
+          Height = 219
           Top = 0
-          Width = 304
+          Width = 368
           Align = alLeft
-          ClientHeight = 259
-          ClientWidth = 302
+          ClientHeight = 217
+          ClientWidth = 366
           TabOrder = 0
           object MenuA: TPanel
             Left = 0
             Height = 50
             Top = 0
-            Width = 302
+            Width = 366
             Align = alTop
             ClientHeight = 50
-            ClientWidth = 302
+            ClientWidth = 366
             TabOrder = 0
             object YA: TEdit
               Left = 120
@@ -312,9 +334,9 @@ object Form1: TForm1
           end
           object SGA: TStringGrid
             Left = 0
-            Height = 209
+            Height = 167
             Top = 50
-            Width = 302
+            Width = 366
             Align = alClient
             AutoFillColumns = True
             ColCount = 0
@@ -326,22 +348,22 @@ object Form1: TForm1
           end
         end
         object BMB: TGroupBox
-          Left = 304
-          Height = 261
+          Left = 368
+          Height = 219
           Top = 0
-          Width = 347
+          Width = 476
           Align = alClient
-          ClientHeight = 259
-          ClientWidth = 345
+          ClientHeight = 217
+          ClientWidth = 474
           TabOrder = 1
           object MenuB: TPanel
             Left = 0
             Height = 50
             Top = 0
-            Width = 345
+            Width = 474
             Align = alTop
             ClientHeight = 50
-            ClientWidth = 345
+            ClientWidth = 474
             TabOrder = 0
             object YB: TEdit
               Left = 120
@@ -369,9 +391,9 @@ object Form1: TForm1
           end
           object SGB: TStringGrid
             Left = 0
-            Height = 209
+            Height = 167
             Top = 50
-            Width = 345
+            Width = 474
             Align = alClient
             AutoFillColumns = True
             ColCount = 0
@@ -387,25 +409,25 @@ object Form1: TForm1
         Left = 0
         Height = 105
         Top = 0
-        Width = 653
+        Width = 846
         Align = alTop
         ClientHeight = 103
-        ClientWidth = 651
+        ClientWidth = 844
         TabOrder = 1
         object MenuPanel: TPanel
           Left = 0
           Height = 103
           Top = 0
-          Width = 304
+          Width = 368
           Align = alLeft
           ClientHeight = 103
-          ClientWidth = 304
+          ClientWidth = 368
           TabOrder = 0
           object OperMatriz: TComboBox
             Left = 32
             Height = 29
             Top = 8
-            Width = 232
+            Width = 304
             ItemHeight = 0
             Items.Strings = (
               'Suma'
@@ -423,10 +445,10 @@ object Form1: TForm1
             Text = 'Operación Matricial'
           end
           object SolOper: TButton
-            Left = 136
+            Left = 152
             Height = 41
             Top = 47
-            Width = 128
+            Width = 184
             Caption = 'OK'
             OnClick = SolOperClick
             TabOrder = 1
@@ -435,13 +457,13 @@ object Form1: TForm1
             Left = 32
             Height = 41
             Top = 47
-            Width = 96
+            Width = 112
             Caption = 'Datos'
             TabOrder = 2
           end
         end
         object MData: TEdit
-          Left = 432
+          Left = 552
           Height = 29
           Top = 16
           Width = 120
@@ -449,7 +471,7 @@ object Form1: TForm1
           Text = '0'
         end
         object Label4: TLabel
-          Left = 376
+          Left = 488
           Height = 17
           Top = 24
           Width = 31
@@ -461,19 +483,19 @@ object Form1: TForm1
     object FSENL: TTabSheet
       Caption = 'Sistema de ENL'
       ClientHeight = 326
-      ClientWidth = 653
+      ClientWidth = 846
       object GroupBox1: TGroupBox
         Left = 0
-        Height = 304
+        Height = 262
         Top = 64
-        Width = 653
+        Width = 846
         Align = alClient
-        ClientHeight = 302
-        ClientWidth = 651
+        ClientHeight = 260
+        ClientWidth = 844
         TabOrder = 0
         object PointInitialSenl: TStringGrid
           Left = 0
-          Height = 302
+          Height = 260
           Top = 0
           Width = 120
           Align = alLeft
@@ -489,9 +511,9 @@ object Form1: TForm1
         end
         object SGEcuationSenl: TStringGrid
           Left = 120
-          Height = 302
+          Height = 260
           Top = 0
-          Width = 531
+          Width = 724
           Align = alClient
           AutoFillColumns = True
           ColCount = 1
@@ -500,7 +522,7 @@ object Form1: TForm1
           RowCount = 1
           TabOrder = 1
           ColWidths = (
-            527
+            720
           )
         end
       end
@@ -508,10 +530,10 @@ object Form1: TForm1
         Left = 0
         Height = 64
         Top = 0
-        Width = 653
+        Width = 846
         Align = alTop
         ClientHeight = 64
-        ClientWidth = 653
+        ClientWidth = 846
         TabOrder = 1
         object EcuationSenl: TEdit
           Left = 39
@@ -529,7 +551,7 @@ object Form1: TForm1
           Text = '0.001'
         end
         object DatoSenl: TButton
-          Left = 384
+          Left = 577
           Height = 29
           Top = 16
           Width = 99
@@ -539,7 +561,7 @@ object Form1: TForm1
           TabOrder = 2
         end
         object OkSenl: TButton
-          Left = 504
+          Left = 697
           Height = 29
           Top = 16
           Width = 115
@@ -553,15 +575,15 @@ object Form1: TForm1
     object FInter: TTabSheet
       Caption = 'Interpolación'
       ClientHeight = 326
-      ClientWidth = 653
+      ClientWidth = 846
       object IPM: TPanel
         Left = 0
         Height = 98
         Top = 0
-        Width = 653
+        Width = 846
         Align = alTop
         ClientHeight = 98
-        ClientWidth = 653
+        ClientWidth = 846
         TabOrder = 0
         object INE: TEdit
           Left = 40
@@ -604,13 +626,13 @@ object Form1: TForm1
         Left = 0
         Height = 228
         Top = 98
-        Width = 653
+        Width = 846
         Align = alClient
         ClientHeight = 226
-        ClientWidth = 651
+        ClientWidth = 844
         TabOrder = 1
         object IEVAL: TPanel
-          Left = 128
+          Left = 321
           Height = 226
           Top = 0
           Width = 523
@@ -665,7 +687,7 @@ object Form1: TForm1
           Left = 0
           Height = 226
           Top = 0
-          Width = 128
+          Width = 321
           Align = alClient
           AutoFillColumns = True
           ColCount = 2
@@ -674,11 +696,24 @@ object Form1: TForm1
           RowCount = 1
           TabOrder = 1
           ColWidths = (
-            62
-            62
+            158
+            159
           )
         end
       end
+    end
+  end
+  object ChartToolset1: TChartToolset
+    left = 336
+    top = 144
+    object ChartToolset1DataPointClickTool1: TDataPointClickTool
+      Shift = [ssLeft]
+      OnPointClick = ChartToolset1DataPointClickTool1PointClick
+    end
+    object ChartToolset1ZoomMouseWheelTool1: TZoomMouseWheelTool
+      ZoomFactor = 1.1
+    end
+    object ChartToolset1PanClickTool1: TPanClickTool
     end
   end
 end
