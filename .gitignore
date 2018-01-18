@@ -1,0 +1,15 @@
+#lazarus
+*.xml
+*.ico
+*.lps
+*.res
+*.o
+*.ppu
+*.compiled
+*.or
+**/lib/*
+**/backup/*
+*.txt
+*.dat
+*.exe
+*.out
