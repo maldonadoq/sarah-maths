@@ -9,15 +9,11 @@ uses
 
 type
   TParseMath = Class
-
   Private
       FParser: TFPExpressionParser;
       identifier: array of TFPExprIdentifierDef;
       Procedure AddFunctions();
-
-
   Public
-
       Expression: string;
       function NewValue( Variable:string; Value: Double ): Double;
       procedure AddVariable( Variable: string; Value: Double );
@@ -25,12 +21,11 @@ type
       function Evaluate(  ): Double;
       constructor create();
       destructor destroy;
-
   end;
 
+function IsNumber(AValue: TExprFloat): Boolean;
+
 implementation
-
-
 
 constructor TParseMath.create;
 begin
@@ -85,7 +80,7 @@ var
 begin
    x := ArgToFloat( Args[ 0 ] );
    ymid:= 100;
-   if IsNumber(x) then begin
+   if IsNumber(x) and ((x-0.5)/pi<>0) then begin
      if(tan(x)>ymid) or (tan(x)<(-ymid)) then
        Result.resFloat := NaN
      else
@@ -119,6 +114,15 @@ var
 begin
    x := ArgToFloat( Args[ 0 ] );
    Result.resFloat := sin(x)
+
+end;
+
+Procedure ExprCosh( var Result: TFPExpressionResult; Const Args: TExprParameterArray);
+var
+  x: Double;
+begin
+   x := ArgToFloat( Args[ 0 ] );
+   Result.resFloat := cosh(x)
 
 end;
 
@@ -189,6 +193,7 @@ begin
        AddFunction('tan', 'F', 'F', @ExprTan);
        AddFunction('sin', 'F', 'F', @ExprSin);
        AddFunction('sen', 'F', 'F', @ExprSin);
+       AddFunction('cosh', 'F', 'F', @ExprCosh);
        AddFunction('cos', 'F', 'F', @ExprCos);
        AddFunction('ln', 'F', 'F', @ExprLn);
        AddFunction('log', 'F', 'F', @ExprLog);
@@ -204,6 +209,7 @@ end;
 procedure TParseMath.AddVariable( Variable: string; Value: Double );
 var Len: Integer;
 begin
+   //(20/(1+log(power(x,2))))-(5*sin(exp(x)))
    Len:= length( identifier ) + 1;
    SetLength( identifier, Len ) ;
    identifier[ Len - 1 ]:= FParser.Identifiers.AddFloatVariable( Variable, Value);

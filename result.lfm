@@ -1,5 +1,5 @@
 object MResult: TMResult
-  Left = 805
+  Left = 804
   Height = 240
   Top = 289
   Width = 439

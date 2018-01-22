@@ -9,8 +9,7 @@ uses
   StdCtrls, LCLType, ExtCtrls, ComCtrls, Grids, ParseMath, TASeries,
   TAFuncSeries, TATools, Intersection, Func, Matrices, Result, Senl,
   Interpolacion, Types, Math, ColorBox, TAChartUtils, TASources,
-  TACustomSeries;
-
+  TACustomSeries, Edo, Integral;
 
 type
 
@@ -18,11 +17,35 @@ type
 
   TForm1 = class(TForm)
     BInterpolar: TButton;
-    ClearFunc: TButton;
+    ButInteg: TButton;
+    BGrapInt: TButton;
+    EdoN: TEdit;
+    GraficaIII: TLineSeries;
+    EdoOk: TButton;
+    Chart2: TChart;
+    Chart3: TChart;
+    ColorEdo: TColorButton;
+    EdoMetodo: TComboBox;
+    EdoEcuac: TEdit;
+    EdoSol: TEdit;
+    EdoInterv: TEdit;
+    EdoInitial: TEdit;
+    FEdo: TTabSheet;
+    EDPanel: TPanel;
+    TextIter: TEdit;
+    GraficaII: TLineSeries;
+    ClearFunct: TButton;
+    CmbInt: TComboBox;
+    ColorInteg: TColorButton;
+    TextIntervGrap: TEdit;
+    ResuInteg: TEdit;
+    TextEcuac: TEdit;
+    TextIntervalo: TEdit;
+    Panel3: TPanel;
+    ResizeFunc: TButton;
     Chart1LineSeries1: TLineSeries;
     ChartToolset1: TChartToolset;
     ChartToolset1DataPointClickTool1: TDataPointClickTool;
-    ChartToolset1PanClickTool1: TPanClickTool;
     ChartToolset1ZoomMouseWheelTool1: TZoomMouseWheelTool;
     InterX: TEdit;
     InterY: TEdit;
@@ -55,6 +78,7 @@ type
     FInter: TTabSheet;
     SGPI: TStringGrid;
     StatusBar1: TStatusBar;
+    FIntegral: TTabSheet;
     XA: TEdit;
     YA: TEdit;
     XB: TEdit;
@@ -81,7 +105,6 @@ type
     ediStep: TEdit;
     Label1: TLabel;
     Label2: TLabel;
-    Label3: TLabel;
     Solution: TPanel;
     Sarah: TPageControl;
     Panel1: TPanel;
@@ -93,10 +116,14 @@ type
     TableData: TStringGrid;
     TrackBar1: TTrackBar;
 
+    procedure BGrapIntClick(Sender: TObject);
     procedure BInterpolarClick(Sender: TObject);
+    procedure ButIntegClick(Sender: TObject);
     procedure ChartToolset1DataPointClickTool1PointClick(ATool: TChartTool;
       APoint: TPoint);
-    procedure ClearFuncClick(Sender: TObject);
+    procedure ClearFunctClick(Sender: TObject);
+    procedure EdoOkClick(Sender: TObject);
+    procedure ResizeFuncClick(Sender: TObject);
     procedure DatoSenlClick(Sender: TObject);
     procedure DBClick(Sender: TObject);
     procedure ILagrangeClick(Sender: TObject);
@@ -125,17 +152,27 @@ type
     Parse: TparseMath;
     MInter: TMethIntersection;
     GList: TList;
+    GListII: TList;
     MSenl: TSENL;
     PointInter: TMPoint;
     MInterpolacion: TInterpolacion;
+    MIntegracion: TIntegral;
+    MEDO: TEDO;
     FuncSelected: Boolean;
     function1,function2: string;
+    nv: integer;
 
     function f(x: Real): Real;
     function Func(x: real; s: string): real;
+    function Points(xmin,xmax: real; fn: string): TList;
+
     procedure CreateNewFunction;
     procedure Graphic2D;
+    procedure ResizeGraphic2D;
+    procedure Clear;
     procedure PointXY();
+    procedure PointInterXY();
+    procedure EdoGrap();
 
   public
   end;
@@ -159,9 +196,27 @@ begin
   Parse.AddVariable('x', min);
   MInter:= TMethIntersection.Create();
   GList:= TList.Create;
+  GListII:= TList.Create;
   MSenl:= TSENL.Create();
+  MIntegracion:= TIntegral.Create();
   MInterpolacion:= TInterpolacion.Create();
+  MEDO:= TEDO.Create();
   FuncSelected:= True;
+  nv:= 20;
+end;
+
+procedure TForm1.FormDestroy(Sender: TObject);
+begin
+  Parse.destroy;
+  MInter.Destroy;
+  GList.Destroy;
+  GListII.Destroy;
+  MSenl.Destroy;
+  MInterpolacion.Destroy;
+  MEDO.Destroy();
+  Clear;
+  FunctionList.Destroy;
+  EditList.Destroy;
 end;
 
 function TForm1.f( x: Real ): Real;
@@ -169,13 +224,6 @@ begin
   Parse.Expression:= TEdit( EditList[ ActiveFunction ]).Text;
   Parse.NewValue('x', x);
   Result:= Parse.Evaluate();
-end;
-
-procedure TForm1.FormDestroy(Sender: TObject);
-begin
-  Parse.destroy;
-  FunctionList.Destroy;
-  EditList.Destroy;
 end;
 
 procedure TForm1.FunctionSeriesCalculate(const AX: Double; out AY: Double);
@@ -190,17 +238,15 @@ end;
 
 procedure TForm1.FunctionsEditKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
   if not (key = VK_RETURN) then
-     exit;
+    exit;
 
-   with TEdit( Sender ) do begin
-       ActiveFunction:= Tag;
-       Graphic2D;
-       if tag = EditList.Count - 1 then
-          CreateNewFunction;
-   end;
-
+  with TEdit(Sender) do begin
+    ActiveFunction:= Tag;
+    Graphic2D;
+    if tag = EditList.Count - 1 then
+      CreateNewFunction;
+  end;
 end;
 
 procedure TForm1.Graphic2D;
@@ -211,11 +257,50 @@ begin
   min:= StrToFloat( ediMin.Text );
   max:= StrToFloat( ediMax.Text );
 
-  with TLineSeries( FunctionList[ ActiveFunction ] ) do begin
-       LinePen.Color:= colorbtnFunction.ButtonColor;
-       LinePen.Width:= TrackBar1.Position;
-
+  with TLineSeries(FunctionList[ActiveFunction]) do begin
+    LinePen.Color:= colorbtnFunction.ButtonColor;
+    LinePen.Width:= TrackBar1.Position;
   end;
+
+  x:= min;
+  TLineSeries( FunctionList[ ActiveFunction ] ).Clear;
+  with TLineSeries( FunctionList[ ActiveFunction ] ) do
+  repeat
+    AddXY(x,f(x));
+    x:= x+h
+  until ( x>= max );
+end;
+
+procedure TForm1.BGrapIntClick(Sender: TObject);
+var
+  PInt: TMPoint;
+  xmi,xma,x,h: real;
+  funct: string;
+begin
+  PInt:= XIntervaloText(TextIntervGrap.Text);
+  funct:= TextEcuac.Text;
+  xmi:= PInt.x; xma:= PInt.y;
+
+  GraficaII.LinePen.Color:= ColorInteg.ButtonColor;
+  x:= xmi; h:=0.01;
+
+  GraficaII.Clear;
+  with GraficaII do
+    repeat
+      AddXY(x,Func(x,funct));
+      x:= x+h
+    until(x>= xma);
+
+  PInt.Destroy();
+end;
+
+procedure TForm1.ResizeGraphic2D;
+var
+  x, h: Real;
+begin
+  h:= StrToFloat( ediStep.Text );
+  min:= StrToFloat( ediMin.Text );
+  max:= StrToFloat( ediMax.Text );
 
   x:= min;
   TLineSeries( FunctionList[ ActiveFunction ] ).Clear;
@@ -224,48 +309,49 @@ begin
       AddXY(x,f(x));
       x:= x+h
   until ( x>= max );
-
-
 end;
 
 procedure TForm1.CreateNewFunction;
 begin
-   EditList.Add( TEdit.Create(ScrollBox1) );
-   //We OKA Edits with functions
-   with Tedit( EditList.Items[ EditList.Count - 1 ] ) do begin
-        Parent:= ScrollBox1;
-        Align:= alTop;
-        name:= FunctionEditName + IntToStr( EditList.Count );
-        OnKeyUp:= @FunctionsEditKeyUp;
-        Font.Size:= 10;
-        Text:= EmptyStr;
-        Tag:= EditList.Count - 1;
-        SetFocus;
-
-   end;
-   //We OKA serial functions
-   FunctionList.Add( TLineSeries.Create( Chart1 ) );
-   with TLineSeries( FunctionList[ FunctionList.Count - 1 ] ) do begin
-        Name:= FunctionSeriesName + IntToStr( FunctionList.Count );
-        Tag:= EditList.Count - 1; // Edit Asossiated
-
-   end;
-   Chart1.AddSeries( TLineSeries( FunctionList[ FunctionList.Count - 1 ] ) );
+  EditList.Add( TEdit.Create(ScrollBox1) );
+  //We OKA Edits with functions
+  with Tedit( EditList.Items[ EditList.Count - 1 ] ) do begin
+    Parent:= ScrollBox1;
+    Align:= alTop;
+    name:= FunctionEditName + IntToStr( EditList.Count );
+    OnKeyUp:= @FunctionsEditKeyUp;
+    Font.Size:= 10;
+    Text:= EmptyStr;
+    Tag:= EditList.Count-1;
+    SetFocus;
+  end;
+  //We OKA serial functions
+  FunctionList.Add( TLineSeries.Create( Chart1 ) );
+  with TLineSeries( FunctionList[ FunctionList.Count - 1 ] ) do begin
+    Name:= FunctionSeriesName + IntToStr( FunctionList.Count );
+    Tag:= EditList.Count - 1; // Edit Asossiated
+  end;
+  Chart1.AddSeries( TLineSeries( FunctionList[ FunctionList.Count - 1 ] ) );
 end;
 
-procedure TForm1.PointSol(xn: integer);
+procedure TForm1.Clear;
 var
   i: integer;
-  xt: string;
 begin
-  SGPoints.RowCount:= GList.Count+1;
-  SGPoints.Cells[0,0]:= 'x'; SGPoints.Cells[1,0]:= 'y';
-  for i:=0 to GList.Count-1 do begin
-    xt:= TBox(GList.Items[i]).M[TBox(GList.Items[i]).x-1,xn];
-    SGPoints.Cells[0,i+1]:= xt;
-    SGPoints.Cells[1,i+1]:= FloatToStr(Func(StrToFloat(xt),function1));
+  for i:=0 to FunctionList.Count-1 do begin
+    TEdit(EditList.Items[i]).Destroy;
+    TLineSeries(FunctionList.Items[i]).Destroy;
   end;
-  PointXY();
+
+  EditList.Clear;
+  FunctionList.Clear;
+  Chart1.ClearSeries;
+end;
+
+procedure TForm1.ClearFunctClick(Sender: TObject);
+begin
+  Clear;
+  CreateNewFunction;
 end;
 
 procedure TForm1.PointXY();
@@ -280,49 +366,126 @@ begin
   end;
 end;
 
+procedure TForm1.PointInterXY();
+var
+  i: integer;
+begin
+  Chart1LineSeries1.Clear;
+  for i:=1 to SGPI.RowCount-1 do begin
+    Chart1LineSeries1.AddXY(StrToFloat(SGPI.Cells[0,i]),StrToFloat(SGPI.Cells[1,i]));
+    Chart1LineSeries1.AddXY(NaN,NaN);
+  end;
+end;
+
+procedure TForm1.PointSol(xn: integer);
+var
+  i,j: integer;
+  xt: string;
+begin
+  j:= GList.Count+1;
+  SGPoints.RowCount:= j+GlistII.Count;
+  SGPoints.Cells[0,0]:= 'x'; SGPoints.Cells[1,0]:= 'y';
+  for i:=0 to GList.Count-1 do begin
+    xt:= TBox(GList.Items[i]).M[TBox(GList.Items[i]).x-1,xn];
+    SGPoints.Cells[0,i+1]:= xt;
+    SGPoints.Cells[1,i+1]:= FloatToStr(Func(StrToFloat(xt),function1));
+  end;
+
+  for i:=0 to GListII.Count-1 do begin
+    xt:= FloatToStr(Real(GListII.Items[i]));
+    SGPoints.Cells[0,j+i]:= xt;
+    SGPoints.Cells[1,j+i]:= FloatToStr(Func(StrToFloat(xt),function1));
+    GList.Add(TBox.Create(0,0));
+  end;
+  PointXY();
+end;
+
+function TForm1.Points(xmin,xmax: real; fn: string): TList;
+var
+  xmint,a,b,step: real;
+  i: integer;
+  t: boolean;
+begin
+  step:= (xmax-xmin)/nv;
+  Result:= TList.Create;
+  GListII.Clear;
+  t:= False;
+  for i:=0 to nv-1 do begin
+    xmint:= xmin;
+    if(t) then begin
+      xmint:= xmint+0.001;
+      t:= False;
+    end;
+
+    a:= Func(xmint,fn);
+    b:= Func(xmin+step,fn);
+    if IsNumber(a) and IsNumber(b) and ((a*b)<0) then begin
+      Result.Add(TMPoint.Create(xmint,xmin+step));
+      WriteLn('('+FloatToStr(xmint)+','+FloatToStr(a)+') ('+FloatToStr(xmin+step)+','+FloatToStr(b)+')');
+    end
+    else if a=0 then
+      GListII.Add(Pointer(xmint))
+    else if b=0 then begin
+      GListII.Add(Pointer(xmin+step));
+      t:= True;
+    end;
+
+    xmin:= xmin+step;
+  end;
+end;
+
 procedure TForm1.InterClick(Sender: TObject);
 var
   PList: TList;
   sl,slp: string;
   i: integer;
-  e: real;
+  xtmp,e: real;
 begin
   if((function1='') or (function2='')) then begin
     ShowMessage('Elige dos Funciones!!!!');
     Exit;
   end;
-  sl:= function1+'-'+function2;
+  sl:= '('+function1+')-('+function2+')';
   WriteLn(sl);
   slp:= Derivada.Text;
-  PList:= TList.Create;
-  PList:= MInter.Points(min,max,sl);
   GList.Clear;
+  PList:= TList.Create;
+  PList:= Points(min,max,sl);
   TableData.Clear;
   SGPoints.Clear;
   e:= StrToFloat(ErrorH.Text);
 
   if(PList.Count<>0) then begin
     if(comb.ItemIndex = 0) then begin
+      for i:=0 to PList.Count-1 do begin
+        xtmp:= MInter.MBisIni(TMPoint(PList.Items[i]).x,TMPoint(PList.Items[i]).y,0.01,sl);
+        GList.Add(MInter.MSecant(xtmp,e,sl));
+      end;
+      PointSol(1);
+    end
+    else if(comb.ItemIndex = 1) then begin
       for i:=0 to PList.Count-1 do
         GList.Add(MInter.MBisect(TMPoint(PList.Items[i]).x,TMPoint(PList.Items[i]).y,e,sl));
       PointSol(3);
     end
-    else if(comb.ItemIndex = 1) then begin
+    else if(comb.ItemIndex = 2) then begin
       for i:=0 to PList.Count-1 do
         GList.Add(MInter.MFalPos(TMPoint(PList.Items[i]).x,TMPoint(PList.Items[i]).y,e,sl));
       PointSol(3);
     end
-    else if(comb.ItemIndex = 2) then begin
+    else if(comb.ItemIndex = 3) then begin
       for i:=0 to PList.Count-1 do
         GList.Add(MInter.MNewton(TMPoint(PList.Items[i]).x,e,sl,slp));
       PointSol(1);
     end
-    else if(comb.ItemIndex = 3) then begin
+    else if(comb.ItemIndex = 4) then begin
       for i:=0 to PList.Count-1 do
         GList.Add(MInter.MSecant(TMPoint(PList.Items[i]).x,e,sl));
       PointSol(1);
     end;
   end
+  else if GListII.Count<>0 then
+     PointSol(1)
   else
     ShowMessage('No hay Intersección!!!!!');
 end;
@@ -334,12 +497,19 @@ var
 begin
   BT:= TBox(GList.Items[StrToInt(Sol.Text)-1]);
   TableData.Clear;
-  TableData.RowCount:= BT.x;
-  TableData.ColCount:= BT.y;
-  for i:=0 to BT.x-1 do begin
-    for j:=0 to BT.y-1 do
-      TableData.Cells[j,i]:= BT.M[i,j];
+  if(BT.x<>0) then begin
+    TableData.RowCount:= BT.x;
+    TableData.ColCount:= BT.y;
+    for i:=0 to BT.x-1 do begin
+      for j:=0 to BT.y-1 do
+        TableData.Cells[j,i]:= BT.M[i,j];
+    end
   end
+  else begin
+    TableData.RowCount:= 1;
+    TableData.ColCount:= 1;
+    TableData.Cells[0,0]:= 'Solución exacta!!!';
+  end;
 end;
 
 procedure TForm1.OKAClick(Sender: TObject);
@@ -360,31 +530,31 @@ function TForm1.CreateA(): TMatriz;
 var
   i,j: integer;
 begin
-  Result:= TMatriz.Create(SGA.ColCount,SGA.RowCount);
-  for i:=0 to SGA.ColCount-1 do
-    for j:=0 to SGA.RowCount-1 do
-      Result.M[i,j]:= StrToFloat(SGA.Cells[i,j]);
+  Result:= TMatriz.Create(SGA.RowCount,SGA.ColCount);
+  for i:=0 to SGA.RowCount-1 do
+    for j:=0 to SGA.ColCount-1 do
+      Result.M[i,j]:= StrToFloat(SGA.Cells[j,i]);
 end;
 
 function TForm1.CreateB(): TMatriz;
 var
   i,j: integer;
 begin
-  Result:= TMatriz.Create(SGB.ColCount,SGB.RowCount);
-  for i:=0 to SGB.ColCount-1 do
-    for j:=0 to SGB.RowCount-1 do
-      Result.M[i,j]:= StrToFloat(SGB.Cells[i,j]);
+  Result:= TMatriz.Create(SGB.RowCount,SGB.ColCount);
+  for i:=0 to SGB.RowCount-1 do
+    for j:=0 to SGB.ColCount-1 do
+      Result.M[i,j]:= StrToFloat(SGB.Cells[j,i]);
 end;
 
 procedure TForm1.PutResult(a: TMatriz);
 var
   i,j: integer;
 begin
-  MResult.SGFResult.RowCount:= a.GetY;
-  MResult.SGFResult.ColCount:= a.GetX;
-  for i:=0 to a.GetX-1 do
-    for j:=0 to a.GetY-1 do
-      MResult.SGFResult.Cells[i,j]:= FloatToStr(a.M[i,j]);
+  MResult.SGFResult.RowCount:= a.GetX;
+  MResult.SGFResult.ColCount:= a.GetY;
+  for i:=0 to a.GetY-1 do
+    for j:=0 to a.GetX-1 do
+      MResult.SGFResult.Cells[i,j]:= FloatToStr(a.M[j,i]);
 end;
 
 procedure TForm1.MatrizRandom();
@@ -473,6 +643,7 @@ var
 begin
   MResult.Show;
 
+  MResult.SGFResult.Clear();
   MResult.SGFResult.RowCount:= TB.x;
   MResult.SGFResult.ColCount:= TB.y;
   for i:=0 to TB.x-1 do
@@ -513,6 +684,7 @@ begin
     1: InterpSol.Text:= 'Newton';
   end;
   MP.Clear;
+  PointInterXY();
 end;
 
 function TForm1.Func(x: real; s: string): real;
@@ -567,8 +739,62 @@ begin
     end;
 end;
 
-procedure TForm1.ClearFuncClick(Sender: TObject);
+procedure TForm1.ResizeFuncClick(Sender: TObject);
+var
+  i: integer;
 begin
+  for i:=0 to FunctionList.Count-2 do begin
+    ActiveFunction:= i;
+    ResizeGraphic2D;
+  end;
+end;
+
+procedure TForm1.ButIntegClick(Sender: TObject);
+var
+  iter: integer;
+  rin: real;
+  MP: TMPoint;
+  fn: string;
+begin
+  fn:= TextEcuac.Text;
+  iter:= StrToInt(TextIter.Text);
+  MP:= XIntervaloText(TextIntervalo.Text);
+  case CmbInt.ItemIndex of
+    0: rin:= MIntegracion.Trapecio(MP.x,MP.y,fn,iter);
+    1: rin:= MIntegracion.SimpsonI(MP.x,MP.y,fn,iter);
+    2: rin:= MIntegracion.SimpsonII(MP.x,MP.y,fn,iter);
+    3: rin:= MIntegracion.CuadraturaGauss(MP.x,MP.y,fn,iter);
+  end;
+  ResuInteg.Text:= FloatToStr(rin);
+end;
+
+
+procedure TForm1.EdoGrap();
+var
+  i: integer;
+begin
+  GraficaIII.LinePen.Color:= ColorEdo.ButtonColor;
+  GraficaIII.Clear;
+  for i:=1 to MResult.SGFResult.RowCount-1 do
+    GraficaIII.AddXY(StrToFloat(MResult.SGFResult.Cells[1,i]),StrToFloat(MResult.SGFResult.Cells[2,i]));
+end;
+
+procedure TForm1.EdoOkClick(Sender: TObject);
+var
+  MB: TBox;
+  P1,P2: TMPoint;
+  ntm: integer;
+begin
+  P1:= XIntervaloText(EdoInterv.Text);
+  P2:= PointInitial(EdoInitial.Text);
+  ntm:= StrToInt(EdoN.Text);
+
+  case EdoMetodo.ItemIndex of
+    0: MB:= MEDO.EulerMejorado(P1.x,P1.y,P2.x,P2.y,ntm,EdoEcuac.Text,EdoSol.Text);
+    1: MB:= MEDO.RungeKutta4(P1.x,P1.y,P2.x,P2.y,ntm,EdoEcuac.Text,EdoSol.Text);
+  end;
+  SGResultado(MB);
+  EdoGrap();
 end;
 
 {$R *.lfm}

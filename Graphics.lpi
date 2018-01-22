@@ -29,7 +29,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="16">
       <Unit0>
         <Filename Value="Graphics.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -113,6 +113,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Interpolacion"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="integral.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Integral"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="edo.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Edo"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
