@@ -5,7 +5,7 @@ unit Func;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, Dialogs;
 
 type
   VectString = array of string;
@@ -38,7 +38,15 @@ type
     Value: Real;
   end;
 
+type
+  TLP = record
+    MList: TList;
+    PList: TList;
+  end;
+
 function XIntervalo(MP: TList): TMPoint;
+function XIntervaloText(Tx: string): TMPoint;
+function PointInitial(Tx: string): TMPoint;
 
 implementation
 
@@ -50,6 +58,76 @@ end;
 
 destructor TMPoint.Destroy();
 begin
+end;
+
+function XIntervaloText(Tx: string): TMPoint;
+var
+  PosCorcheteIni, PosCorcheteFin, PosSeparador: Integer;
+  PosicionValidad: Boolean;
+  i: Integer;
+  x: Double;
+  xmin,xmax: string;
+const
+  CorcheteIni = '[';
+  CorcheteFin = ']';
+  Separador = ';';
+begin
+
+  PosCorcheteIni:= Pos(CorcheteIni, Tx);
+  PosCorcheteFin:= pos(CorcheteFin, Tx);
+  PosSeparador:= Pos(Separador, Tx);
+
+  PosicionValidad:= (PosCorcheteIni > 0);
+  PosicionValidad:= PosicionValidad and (PosSeparador > 2);
+  PosicionValidad:= PosicionValidad and (PosCorcheteFin > 3);
+
+  if not PosicionValidad then begin
+    ShowMessage( 'Error en el intervalo');
+    exit;
+  end;
+
+  xmin:= Copy(Tx,PosCorcheteIni+1, PosSeparador-2);
+
+  xmin:= Trim(xmin);
+  xmax:= Copy(Tx, PosSeparador+1, Length(Tx)-PosSeparador-1);
+
+  xmax:= Trim(xmax);
+  Result:= TMPoint.Create(StrToFloat(xmin),StrToFloat(xmax));
+end;
+
+function PointInitial(Tx: string): TMPoint;
+var
+  PosCorcheteIni, PosCorcheteFin, PosSeparador: Integer;
+  PosicionValidad: Boolean;
+  i: Integer;
+  x: Double;
+  xmin,xmax: string;
+const
+  CorcheteIni = '(';
+  CorcheteFin = ')';
+  Separador = ',';
+begin
+
+  PosCorcheteIni:= Pos(CorcheteIni, Tx);
+  PosCorcheteFin:= pos(CorcheteFin, Tx);
+  PosSeparador:= Pos(Separador, Tx);
+
+  PosicionValidad:= (PosCorcheteIni > 0);
+  PosicionValidad:= PosicionValidad and (PosSeparador > 2);
+  PosicionValidad:= PosicionValidad and (PosCorcheteFin > 3);
+
+  if not PosicionValidad then begin
+    ShowMessage( 'Error en el Punto');
+    exit;
+  end;
+
+  xmin:= Copy(Tx,PosCorcheteIni+1, PosSeparador-2);
+
+  xmin:= Trim(xmin);
+  xmax:= Copy(Tx, PosSeparador+1, Length(Tx)-PosSeparador-1);
+
+  xmax:= Trim(xmax);
+  Result:= TMPoint.Create(StrToFloat(xmin),StrToFloat(xmax));
 end;
 
 function XIntervalo(MP: TList): TMPoint;
