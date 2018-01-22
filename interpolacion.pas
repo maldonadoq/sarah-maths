@@ -35,24 +35,24 @@ begin
   n:= B.Count;
 
   for i:=0 to n-1 do begin
-    if(TPoint(B.Items[i]).y <> 0) then begin
-      lg := '('+FloatToStr(TPoint(B.Items[i]).y)+'*';
+    if(TMPoint(B.Items[i]).y <> 0) then begin
+      lg := '('+FloatToStr(TMPoint(B.Items[i]).y)+'*';
       rs:=1.0;
       for j:=0 to n-1 do begin
         if(i<>j) then begin
-          if(TPoint(B.Items[j]).x = 0) then begin
+          if(TMPoint(B.Items[j]).x = 0) then begin
             lg:= lg+'x*';
           end
           else begin
             lg := lg+'(x';
-            if(TPoint(B.Items[j]).x <0) then
+            if(TMPoint(B.Items[j]).x <0) then
               lg:= lg +'+'
             else
               lg:= lg +'-';
 
-            lg:= lg + FloatToStr(Abs(TPoint(B.Items[j]).x))+')*';
+            lg:= lg + FloatToStr(Abs(TMPoint(B.Items[j]).x))+')*';
           end;
-          rs:= rs*(TPoint(B.Items[i]).x-TPoint(B.Items[j]).x);
+          rs:= rs*(TMPoint(B.Items[i]).x-TMPoint(B.Items[j]).x);
         end;
       end;
       SetLength(lg,Length(lg)-1);
