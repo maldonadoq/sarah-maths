@@ -10,14 +10,13 @@ uses
 type
   TMethIntersection = class
     private
-      nv: integer;
     public
       MParse: TParseMath;
       constructor Create();
       destructor Destroy(); override;
 
-      function Points(xmin,xmax: real; fn: string): TList;
       function Func(x: real; f: string): real;
+      function MBisIni(a,b,e: real; fn: string):  real;
       function MBisect(a,b,e: real; fn: string):  TBox;
       function MFalPos(a,b,e: real; fn: string):  TBox;
       function MNewton(a,e: real; fn,fp: string): TBox;
@@ -30,25 +29,10 @@ constructor TMethIntersection.Create();
 begin
   MParse:= TParseMath.create();
   MParse.AddVariable('x',0);
-  nv:= 100;
 end;
 
 destructor TMethIntersection.Destroy();
 begin
-end;
-
-function TMethIntersection.Points(xmin,xmax: real; fn: string): TList;
-var
-  step: real;
-  i: integer;
-begin
-  step:= (xmax-xmin)/nv;
-  Result:= TList.Create;
-  for i:=0 to nv-1 do begin
-    if((Func(xmin,fn)*Func(xmin+step,fn)) <= 0) then
-      Result.Add(TMPoint.Create(xmin,xmin+step));
-    xmin:= xmin+step;
-  end;
 end;
 
 function TMethIntersection.Func(x: real; f: string): real;
@@ -81,6 +65,22 @@ begin
   MT.Clear;
 end;
 
+function TMethIntersection.MBisIni(a,b,e: real; fn: string): real;
+var
+  et,vt,v,s: real;
+begin
+  et:= e+1; v:= 0;
+  while(e<et) do begin
+    vt:= v;
+    v:= (a+b)/2;
+    et:= abs(vt-v);
+    s:= Func(a,fn)*Func(v,fn);
+
+    if(s<0) then b:= v
+    else a:= v;
+  end;
+  Result:= v;
+end;
 
 function TMethIntersection.MFalPos(a,b,e: real; fn: string): TBox;
 var
