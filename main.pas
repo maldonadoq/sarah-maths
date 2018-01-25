@@ -8,8 +8,8 @@ uses
   Classes, SysUtils, FileUtil, TAGraph, Forms, Controls, Graphics, Dialogs,
   StdCtrls, LCLType, ExtCtrls, ComCtrls, Grids, ParseMath, TASeries,
   TAFuncSeries, TATools, Intersection, Func, Matrices, Result, Senl,
-  Interpolacion, Types, Math, ColorBox, TAChartUtils, TASources,
-  TACustomSeries, Edo, Integral;
+  Interpolacion, Types, Math, TAChartUtils, TACustomSeries, uCmdBox,
+  Edo, Integral;
 
 type
 
